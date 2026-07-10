@@ -4,8 +4,9 @@ import EmptyState from './components/EmptyState.jsx';
 import ErrorState from './components/ErrorState.jsx';
 import InputForm from './components/InputForm.jsx';
 import LoadingState from './components/LoadingState.jsx';
-import { useGenerate } from './hooks/useGenerate.js';
 import FlashcardDeck from './components/FlashcardDeck.jsx';
+import Quiz from './components/Quiz.jsx';
+import { useGenerate } from './hooks/useGenerate.js';
 
 const MIN_NOTES_LENGTH = 10;
 
@@ -17,6 +18,8 @@ const qualityNotes = [
 
 function App() {
   const [notes, setNotes] = useState('');
+  const [activeView, setActiveView] = useState('flashcards'); // 'flashcards' | 'quiz'
+  const [quizQuestions, setQuizQuestions] = useState(null);
   const { status, data, errorMessage, generate, reset } = useGenerate();
 
   const trimmedNotes = notes.trim();
@@ -26,6 +29,8 @@ function App() {
   function handleSubmit(event) {
     event.preventDefault();
     if (!canSubmit || isLoading) return;
+    setActiveView('flashcards');
+    setQuizQuestions(null);
     generate(trimmedNotes);
   }
 
@@ -35,7 +40,25 @@ function App() {
 
   function handleClear() {
     setNotes('');
+    setActiveView('flashcards');
+    setQuizQuestions(null);
     reset();
+  }
+
+  function handleStartQuiz(questions) {
+    setQuizQuestions(questions);
+    setActiveView('quiz');
+  }
+
+  function handleRetestWrong(wrongIds) {
+    const subset = data.quiz.filter((q) => wrongIds.includes(q.id));
+    setQuizQuestions(subset);
+    setActiveView('quiz');
+  }
+
+  function handleBackToFlashcards() {
+    setActiveView('flashcards');
+    setQuizQuestions(null);
   }
 
   return (
@@ -85,38 +108,57 @@ function App() {
           status={status}
           data={data}
           errorMessage={errorMessage}
+          activeView={activeView}
+          quizQuestions={quizQuestions}
           onRetry={handleRetry}
+          onStartQuiz={handleStartQuiz}
+          onRetestWrong={handleRetestWrong}
+          onBackToFlashcards={handleBackToFlashcards}
+          onRetestCards={(unknownIds) => {
+            const subset = data.flashcards.filter((c) => unknownIds.includes(c.id));
+            // Retest cards re-enters FlashcardDeck with a subset — handled in Phase 5
+            handleStartQuiz(data.quiz); // placeholder until Phase 5
+            void subset;
+          }}
         />
       </section>
     </main>
   );
 }
 
-function WorkspacePanel({ status, data, errorMessage, onRetry }) {
-  if (status === 'loading') {
-    return <LoadingState />;
-  }
+function WorkspacePanel({
+  status, data, errorMessage, activeView, quizQuestions,
+  onRetry, onStartQuiz, onRetestWrong, onBackToFlashcards, onRetestCards,
+}) {
+  if (status === 'loading') return <LoadingState />;
 
   if (status === 'error') {
     return (
       <ErrorState
         title="Study generation is temporarily unavailable"
-        message={
-          errorMessage ||
-          'Your notes are preserved, so you can retry without rebuilding your prompt.'
-        }
+        message={errorMessage || 'Your notes are preserved, so you can retry without rebuilding your prompt.'}
         onRetry={onRetry}
       />
     );
   }
 
   if (status === 'success' && data) {
+    if (activeView === 'quiz' && quizQuestions) {
+      return (
+        <Quiz
+          questions={quizQuestions}
+          onRetestWrong={onRetestWrong}
+          onBackToFlashcards={onBackToFlashcards}
+        />
+      );
+    }
+
     return (
       <FlashcardDeck
         flashcards={data.flashcards}
         topic={data.topic}
-        onStartQuiz={() => {}}
-        onRetestCards={() => {}}
+        onStartQuiz={() => onStartQuiz(data.quiz)}
+        onRetestCards={onRetestCards}
       />
     );
   }
