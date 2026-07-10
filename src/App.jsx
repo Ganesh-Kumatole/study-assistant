@@ -5,6 +5,7 @@ import ErrorState from './components/ErrorState.jsx';
 import InputForm from './components/InputForm.jsx';
 import LoadingState from './components/LoadingState.jsx';
 import { useGenerate } from './hooks/useGenerate.js';
+import FlashcardDeck from './components/FlashcardDeck.jsx';
 
 const MIN_NOTES_LENGTH = 10;
 
@@ -100,20 +101,23 @@ function WorkspacePanel({ status, data, errorMessage, onRetry }) {
     return (
       <ErrorState
         title="Study generation is temporarily unavailable"
-        message={errorMessage || 'Your notes are preserved, so you can retry without rebuilding your prompt.'}
+        message={
+          errorMessage ||
+          'Your notes are preserved, so you can retry without rebuilding your prompt.'
+        }
         onRetry={onRetry}
       />
     );
   }
 
   if (status === 'success' && data) {
-    // FlashcardDeck will replace this placeholder in Phase 3
     return (
-      <section className="state-panel">
-        <p className="eyebrow">Ready</p>
-        <h2>{data.topic}</h2>
-        <p>{data.flashcards.length} flashcards · {data.quiz.length} quiz questions</p>
-      </section>
+      <FlashcardDeck
+        flashcards={data.flashcards}
+        topic={data.topic}
+        onStartQuiz={() => {}}
+        onRetestCards={() => {}}
+      />
     );
   }
 

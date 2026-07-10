@@ -432,3 +432,100 @@ textarea[readonly] {
     min-height: 220px;
   }
 }
+
+/* ── Flashcard deck ─────────────────────────────────────────── */
+
+.flashcard-deck,
+.deck-summary {
+  gap: 20px;
+}
+
+.card-counter {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.flashcard-wrapper {
+  display: grid;
+  gap: 16px;
+}
+
+.flashcard {
+  position: relative;
+  min-height: 180px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  transform-style: preserve-3d;
+  transition: transform 420ms ease;
+}
+
+.flashcard.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  background: var(--pine-soft);
+  border-radius: var(--radius);
+}
+
+.face-label {
+  margin-bottom: 10px;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.flashcard-face p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mark-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius);
+  font-weight: 800;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.mark-action:hover {
+  transform: translateY(-1px);
+}
+
+.mark-known {
+  color: var(--pine);
+  background: var(--pine-soft);
+}
+
+.mark-unknown {
+  color: var(--clay);
+  background: var(--clay-soft);
+}
