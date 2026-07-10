@@ -4,14 +4,9 @@ import EmptyState from './components/EmptyState.jsx';
 import ErrorState from './components/ErrorState.jsx';
 import InputForm from './components/InputForm.jsx';
 import LoadingState from './components/LoadingState.jsx';
+import { useGenerate } from './hooks/useGenerate.js';
 
 const MIN_NOTES_LENGTH = 10;
-
-const viewStates = {
-  idle: 'idle',
-  loading: 'loading',
-  error: 'error',
-};
 
 const qualityNotes = [
   'Flashcards, quizzes, and retests stay in one flow',
@@ -21,32 +16,25 @@ const qualityNotes = [
 
 function App() {
   const [notes, setNotes] = useState('');
-  const [view, setView] = useState(viewStates.idle);
-  const [submittedWordCount, setSubmittedWordCount] = useState(0);
+  const { status, data, errorMessage, generate, reset } = useGenerate();
 
   const trimmedNotes = notes.trim();
   const canSubmit = trimmedNotes.length > MIN_NOTES_LENGTH;
-  const isLoading = view === viewStates.loading;
+  const isLoading = status === 'loading';
 
   function handleSubmit(event) {
     event.preventDefault();
-
-    if (!canSubmit || isLoading) {
-      return;
-    }
-
-    setSubmittedWordCount(countWords(trimmedNotes));
-    setView(viewStates.error);
+    if (!canSubmit || isLoading) return;
+    generate(trimmedNotes);
   }
 
   function handleRetry() {
-    setView(viewStates.idle);
+    reset();
   }
 
   function handleClear() {
     setNotes('');
-    setSubmittedWordCount(0);
-    setView(viewStates.idle);
+    reset();
   }
 
   return (
@@ -93,8 +81,9 @@ function App() {
         />
 
         <WorkspacePanel
-          view={view}
-          submittedWordCount={submittedWordCount}
+          status={status}
+          data={data}
+          errorMessage={errorMessage}
           onRetry={handleRetry}
         />
       </section>
@@ -102,31 +91,33 @@ function App() {
   );
 }
 
-function WorkspacePanel({ view, submittedWordCount, onRetry }) {
-  if (view === viewStates.loading) {
+function WorkspacePanel({ status, data, errorMessage, onRetry }) {
+  if (status === 'loading') {
     return <LoadingState />;
   }
 
-  if (view === viewStates.error) {
+  if (status === 'error') {
     return (
       <ErrorState
         title="Study generation is temporarily unavailable"
-        message="Your notes are preserved, so you can retry without rebuilding your prompt."
-        meta={
-          submittedWordCount > 0
-            ? `${submittedWordCount} words are ready to retry.`
-            : undefined
-        }
+        message={errorMessage || 'Your notes are preserved, so you can retry without rebuilding your prompt.'}
         onRetry={onRetry}
       />
     );
   }
 
-  return <EmptyState />;
-}
+  if (status === 'success' && data) {
+    // FlashcardDeck will replace this placeholder in Phase 3
+    return (
+      <section className="state-panel">
+        <p className="eyebrow">Ready</p>
+        <h2>{data.topic}</h2>
+        <p>{data.flashcards.length} flashcards · {data.quiz.length} quiz questions</p>
+      </section>
+    );
+  }
 
-function countWords(text) {
-  return text.split(/\s+/).filter(Boolean).length;
+  return <EmptyState />;
 }
 
 export default App;

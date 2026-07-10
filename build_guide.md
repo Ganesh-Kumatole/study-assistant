@@ -159,48 +159,55 @@ Write a short section in the README documenting how each of these is handled —
 
 ## 7. Build phases (commit after each phase — small, meaningful commits, not one giant commit)
 
-### Phase 1 — Scaffold
+> **Note on build order:** The API/backend is intentionally deferred to Phase 8. All frontend phases use a mock data layer (`src/lib/mockData.js`) that returns a hardcoded response matching the exact data contract. When the real API is ready, only one function in `useGenerate.js` needs to change — every component, validation, and state machine stays identical.
+
+### Phase 1 — Scaffold ✅ Done
 - `npm create vite@latest study-assistant -- --template react`
 - Set up folder structure (see Section 9).
-- Install dependencies: `@google/generative-ai`.
-- Set up `.env` / `.env.local` for `GEMINI_API_KEY`, add to `.gitignore`.
+- Install dependencies: `lucide-react`.
+- Build `InputForm`, `LoadingState`, `ErrorState`, `EmptyState` components.
+- Basic `App.jsx` state machine (`idle` / `loading` / `error`) and two-panel layout.
 - Commit: `chore: scaffold Vite React app`
 
-### Phase 2 — Backend function + data contract
-- Write the serverless function that accepts `{ notes }`, calls Gemini with the schema from Section 3, and returns validated JSON or a normalized error object.
-- Write a standalone validation function (`validateResponse.js`) that checks the full contract from Section 3 — this will be reused/tested independently of the network call.
-- Test the function directly (e.g. via curl or a local test script) before touching the frontend.
-- Commit: `feat: add Gemini serverless function with schema-constrained output and validation`
+### Phase 2 — Data contract + mock
+- Create `src/lib/geminiSchema.js` — the `responseSchema` definition (used later by the serverless function).
+- Create `src/lib/validateResponse.js` — full standalone validation logic matching every rule in Section 3.
+- Create `src/lib/mockData.js` — a realistic hardcoded response matching the exact schema (used as the data source until the real API is wired up).
+- Create `src/hooks/useGenerate.js` — fetch hook wired to the mock for now, but already includes `AbortController`, 30s timeout, and stale-response guard so none of that needs to be revisited later.
+- Wire up `useGenerate` in `App.jsx` — replace the stubbed `handleSubmit` with the real hook. At this point: submit → loading → success (with validated mock data) or error should all work correctly.
+- Install `@google/generative-ai` as a dependency (needed later, harmless now).
+- Commit: `feat: data contract, validation, mock, and useGenerate hook`
 
-### Phase 3 — Core input/loading/error states
-- Build `InputForm`, `LoadingState`, `ErrorState`, `EmptyState` components.
-- Wire up the fetch call from frontend to backend with `AbortController`, timeout, and stale-response handling.
-- At this point you should be able to submit text and see loading → success (raw JSON dump is fine temporarily) or loading → error correctly for all failure cases in Section 6.
-- Commit: `feat: wire up input, loading, and error states with request cancellation`
-
-### Phase 4 — Flashcard deck
+### Phase 3 — Flashcard deck
 - Build `FlashcardDeck` and `Flashcard` components per the flow in Section 5.
 - Implement flip, mark known/unknown, next-card navigation, end-of-deck summary.
 - Commit: `feat: build flashcard deck with flip and known/unknown tracking`
 
-### Phase 5 — Quiz
+### Phase 4 — Quiz
 - Build `Quiz` and `QuizQuestion` components per Section 5.
 - Implement answer selection, correct/incorrect feedback + explanation, scoring, next-question navigation, results screen.
 - Commit: `feat: build quiz with scoring and explanations`
 
-### Phase 6 — Retest flow
-- Implement "Retest wrong answers" using the tracked wrong-answer IDs from Phase 5.
-- Implement "Retest marked cards" using tracked unknown-card IDs from Phase 4 (re-enter flashcard mode with just that subset).
+### Phase 5 — Retest flow
+- Implement "Retest wrong answers" using the tracked wrong-answer IDs from Phase 4.
+- Implement "Retest marked cards" using tracked unknown-card IDs from Phase 3 (re-enter flashcard mode with just that subset).
 - Commit: `feat: add retest flow for wrong quiz answers and unknown flashcards`
 
-### Phase 7 — Failure-handling hardening pass
+### Phase 6 — Failure-handling hardening pass
 - Go through every item in Section 6's checklist individually and verify it. Fix anything that doesn't behave correctly.
 - Add explicit UI polish for error states (icon/color, retry button placement).
 - Commit: `fix: harden failure handling across all error paths`
 
-### Phase 8 — Mobile responsiveness
+### Phase 7 — Mobile responsiveness
 - Test at ~375px width (iPhone SE) and ~390px (standard modern phone). Fix layout breaks, tap target sizes, font sizes.
 - Commit: `style: responsive layout for mobile`
+
+### Phase 8 — Real API (backend)
+- Write `api/generate.js` — the serverless function that accepts `{ notes }`, calls Gemini with the schema from `geminiSchema.js`, and returns validated JSON or a normalized error object.
+- Set up `.env.local` for `GEMINI_API_KEY`, confirm it's in `.gitignore`. **Never prefix with `VITE_`.**
+- In `useGenerate.js`, swap the mock call for the real `fetch('/api/generate', ...)` call — this is the only file that changes.
+- Test the function directly (e.g. via curl) before testing end-to-end in the browser.
+- Commit: `feat: add Gemini serverless function and wire up real API`
 
 ### Phase 9 — README + AI-usage note
 - Write the README (see Section 8 below for required contents).
@@ -232,7 +239,7 @@ Write a short section in the README documenting how each of these is handled —
 ```
 study-assistant/
   api/
-    generate.js            # serverless function, holds API key
+    generate.js            # serverless function, holds API key (added in Phase 8)
   src/
     components/
       InputForm.jsx
@@ -246,13 +253,15 @@ study-assistant/
       ResultsScreen.jsx
     hooks/
       useGenerate.js        # fetch logic, AbortController, stale-response guard
+                            # Phase 2: points to mockData; Phase 8: points to /api/generate
     lib/
       validateResponse.js   # schema validation, reusable/testable
-      geminiSchema.js        # the responseSchema definition shared with backend
+      geminiSchema.js       # the responseSchema definition shared with backend
+      mockData.js           # hardcoded response matching the data contract (Phase 2–7 only)
     App.jsx
     main.jsx
     index.css
-  .env.local                # GEMINI_API_KEY (gitignored)
+  .env.local                # GEMINI_API_KEY (gitignored, added in Phase 8)
   .gitignore
   README.md
   package.json
