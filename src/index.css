@@ -428,8 +428,41 @@ textarea[readonly] {
     width: 100%;
   }
 
+  .primary-action.compact {
+    width: 100%;
+  }
+
   textarea {
     min-height: 220px;
+  }
+
+  /* Flashcard */
+  .flashcard {
+    min-height: 160px;
+  }
+
+  .flashcard-face {
+    padding: 16px;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .mark-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Quiz */
+  .option-btn {
+    grid-template-columns: 28px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .option-label {
+    grid-column: 2;
+    margin-top: 4px;
   }
 }
 
