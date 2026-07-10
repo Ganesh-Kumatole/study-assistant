@@ -20,6 +20,16 @@ async function fetchStudyData(_notes, signal) {
   return mockResponse;
 }
 
+function classifyError(err, timedOut) {
+  if (err.name === 'AbortError') {
+    return timedOut ? 'The request took too long. Please try again.' : null; // user-triggered abort — discard silently
+  }
+  if (err instanceof TypeError) {
+    return 'Unable to reach the server. Check your connection and retry.';
+  }
+  return 'Something went wrong. Your notes are saved — please retry.';
+}
+
 export function useGenerate() {
   const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
   const [data, setData] = useState(null);
@@ -41,7 +51,11 @@ export function useGenerate() {
     setData(null);
     setErrorMessage('');
 
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, TIMEOUT_MS);
 
     try {
       const raw = await fetchStudyData(notes, controller.signal);
@@ -62,13 +76,10 @@ export function useGenerate() {
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
 
-      if (err.name === 'AbortError') {
-        setErrorMessage('The request took too long. Please try again.');
-      } else {
-        setErrorMessage(
-          'Something went wrong. Your notes are saved — please retry.',
-        );
-      }
+      const message = classifyError(err, timedOut);
+      if (message === null) return; // user-triggered abort, already handled by reset()
+
+      setErrorMessage(message);
       setStatus('error');
     } finally {
       clearTimeout(timeoutId);
