@@ -22,6 +22,7 @@ function App() {
   const [quizQuestions, setQuizQuestions] = useState(null);
   const [flashcardSubset, setFlashcardSubset] = useState(null); // null = full deck
   const [deckKey, setDeckKey] = useState(0); // incremented to remount FlashcardDeck fresh
+  const [quizKey, setQuizKey] = useState(0); // incremented to remount Quiz fresh
   const { status, data, errorMessage, generate, reset } = useGenerate();
 
   const trimmedNotes = notes.trim();
@@ -54,12 +55,14 @@ function App() {
   function handleStartQuiz(questions) {
     setQuizQuestions(questions);
     setActiveView('quiz');
+    setQuizKey((k) => k + 1);
   }
 
   function handleRetestWrong(wrongIds) {
     const subset = data.quiz.filter((q) => wrongIds.includes(q.id));
     setQuizQuestions(subset);
     setActiveView('quiz');
+    setQuizKey((k) => k + 1);
   }
 
   function handleRetestCards(unknownIds) {
@@ -126,6 +129,7 @@ function App() {
           quizQuestions={quizQuestions}
           flashcardSubset={flashcardSubset}
           deckKey={deckKey}
+          quizKey={quizKey}
           onRetry={handleRetry}
           onStartQuiz={handleStartQuiz}
           onRetestWrong={handleRetestWrong}
@@ -145,6 +149,7 @@ function WorkspacePanel({
   quizQuestions,
   flashcardSubset,
   deckKey,
+  quizKey,
   onRetry,
   onStartQuiz,
   onRetestWrong,
@@ -170,6 +175,7 @@ function WorkspacePanel({
     if (activeView === 'quiz' && quizQuestions) {
       return (
         <Quiz
+          key={quizKey}
           questions={quizQuestions}
           onRetestWrong={onRetestWrong}
           onBackToFlashcards={onBackToFlashcards}
