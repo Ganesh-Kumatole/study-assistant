@@ -1,33 +1,33 @@
 import { useState, useRef } from 'react';
 import { validateResponse } from '../lib/validateResponse.js';
-import { mockResponse } from '../lib/mockData.js';
 
 const TIMEOUT_MS = 30_000;
 
-// Simulates the API call using mock data.
-// Replace this function body in Phase 8 with:
-//   const res = await fetch('/api/generate', { method: 'POST', signal, body: JSON.stringify({ notes }), headers: { 'Content-Type': 'application/json' } });
-//   if (!res.ok) throw new Error('Server error');
-//   return res.json();
-async function fetchStudyData(_notes, signal) {
-  await new Promise((resolve, reject) => {
-    const timer = setTimeout(resolve, 800);
-    signal.addEventListener('abort', () => {
-      clearTimeout(timer);
-      reject(new DOMException('Aborted', 'AbortError'));
-    });
+async function fetchStudyData(notes, signal) {
+  const res = await fetch('/api/generate', {
+    method: 'POST',
+    signal,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes }),
   });
-  return mockResponse;
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.message ?? 'Server error.');
+  }
+
+  return data;
 }
 
 function classifyError(err, timedOut) {
   if (err.name === 'AbortError') {
-    return timedOut ? 'The request took too long. Please try again.' : null; // user-triggered abort — discard silently
+    return timedOut ? 'The request took too long. Please try again.' : null;
   }
   if (err instanceof TypeError) {
     return 'Unable to reach the server. Check your connection and retry.';
   }
-  return 'Something went wrong. Your notes are saved — please retry.';
+  return err.message ?? 'Something went wrong. Your notes are saved — please retry.';
 }
 
 export function useGenerate() {
@@ -38,7 +38,6 @@ export function useGenerate() {
   const requestIdRef = useRef(0);
 
   async function generate(notes) {
-    // Cancel any in-flight request
     if (abortRef.current) {
       abortRef.current.abort();
     }
@@ -60,7 +59,6 @@ export function useGenerate() {
     try {
       const raw = await fetchStudyData(notes, controller.signal);
 
-      // Discard stale responses
       if (requestId !== requestIdRef.current) return;
 
       const result = validateResponse(raw);
@@ -77,7 +75,7 @@ export function useGenerate() {
       if (requestId !== requestIdRef.current) return;
 
       const message = classifyError(err, timedOut);
-      if (message === null) return; // user-triggered abort, already handled by reset()
+      if (message === null) return;
 
       setErrorMessage(message);
       setStatus('error');
