@@ -27,7 +27,9 @@ function classifyError(err, timedOut) {
   if (err instanceof TypeError) {
     return 'Unable to reach the server. Check your connection and retry.';
   }
-  return err.message ?? 'Something went wrong. Your notes are saved — please retry.';
+  return (
+    err.message ?? 'Something went wrong. Your notes are saved — please retry.'
+  );
 }
 
 export function useGenerate() {

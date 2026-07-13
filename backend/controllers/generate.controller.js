@@ -1,22 +1,17 @@
 import { GoogleGenAI } from '@google/genai';
-import { responseSchema } from '../src/lib/geminiSchema.js';
+import { responseSchema } from '../../src/lib/geminiSchema.js';
 
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'models/gemini-3.5-flash';
 
-const SYSTEM_INSTRUCTION = `You are a study assistant. Given the user's notes or topic, generate a study set.
+// Tells the model exactly what we want back — structure, tone, constraints
+const SYSTEM_PROMPT = `You are a study assistant. Given the user's notes or topic, generate a study set.
 Return ONLY a JSON object — no markdown, no extra text.
 Generate between 4 and 8 flashcards and between 4 and 8 quiz questions.
 Each flashcard must have a unique id, a front (question/term), and a back (answer/explanation).
 Each quiz question must have a unique id, a question, exactly 4 options, a correctIndex (0–3), and a clear explanation.
 All fields are required — never return null or empty strings.`;
 
-async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res
-      .status(405)
-      .json({ error: true, message: 'Method not allowed.' });
-  }
-
+export async function generate(req, res) {
   const { notes } = req.body ?? {};
 
   if (!notes || typeof notes !== 'string' || notes.trim().length === 0) {
@@ -26,10 +21,11 @@ async function handler(req, res) {
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-    const interaction = await ai.interactions.create({
+    const response = await ai.interactions.create({
       model: MODEL,
-      system_instruction: SYSTEM_INSTRUCTION,
+      stream: false,
       input: notes.trim(),
+      system_instruction: SYSTEM_PROMPT,
       response_format: {
         type: 'text',
         mime_type: 'application/json',
@@ -37,8 +33,8 @@ async function handler(req, res) {
       },
     });
 
-    const parsed = JSON.parse(interaction.output_text);
-    return res.status(200).json(parsed);
+    const data = JSON.parse(response.output_text);
+    return res.status(200).json(data);
   } catch (err) {
     const status = err?.status ?? err?.httpStatus ?? 500;
 
@@ -48,10 +44,12 @@ async function handler(req, res) {
         .json({ error: true, message: 'API key invalid or unauthorised.' });
     }
     if (status === 429) {
-      return res.status(429).json({
-        error: true,
-        message: 'Rate limit reached. Please wait a moment and retry.',
-      });
+      return res
+        .status(429)
+        .json({
+          error: true,
+          message: 'Rate limit reached. Please wait a moment and retry.',
+        });
     }
     if (err instanceof SyntaxError) {
       return res
@@ -59,10 +57,9 @@ async function handler(req, res) {
         .json({ error: true, message: 'Model returned unparseable output.' });
     }
 
+    console.error('[generate] unexpected error:', err.message);
     return res
       .status(500)
       .json({ error: true, message: 'Generation failed. Please retry.' });
   }
 }
-
-export default handler;
