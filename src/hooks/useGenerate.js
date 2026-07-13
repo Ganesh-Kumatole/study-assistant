@@ -3,23 +3,24 @@ import { validateResponse } from '../lib/validateResponse.js';
 
 const TIMEOUT_MS = 30_000;
 
+// Sends the notes to our backend proxy, which handles the Gemini call
 async function fetchStudyData(notes, signal) {
   const res = await fetch('/api/generate', {
     method: 'POST',
     signal,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ notes }),
   });
 
   const data = await res.json();
 
-  if (!res.ok) {
-    throw new Error(data?.message ?? 'Server error.');
-  }
+  if (!res.ok) throw new Error(data?.message ?? 'Server error.');
 
   return data;
 }
 
+// Translates raw errors into messages the UI can show the user.
+// Returns null for user-triggered aborts — those are silent by design.
 function classifyError(err, timedOut) {
   if (err.name === 'AbortError') {
     return timedOut ? 'The request took too long. Please try again.' : null;
@@ -37,12 +38,10 @@ export function useGenerate() {
   const [data, setData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const abortRef = useRef(null);
-  const requestIdRef = useRef(0);
+  const requestIdRef = useRef(0); // guards against stale responses from previous requests
 
   async function generate(notes) {
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
+    abortRef.current?.abort();
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -87,7 +86,7 @@ export function useGenerate() {
   }
 
   function reset() {
-    if (abortRef.current) abortRef.current.abort();
+    abortRef.current?.abort();
     setStatus('idle');
     setData(null);
     setErrorMessage('');

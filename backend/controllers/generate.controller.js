@@ -3,7 +3,6 @@ import { responseSchema } from '../../src/lib/geminiSchema.js';
 
 const MODEL = 'models/gemini-3.5-flash';
 
-// Tells the model exactly what we want back — structure, tone, constraints
 const SYSTEM_PROMPT = `You are a study assistant. Given the user's notes or topic, generate a study set.
 Return ONLY a JSON object — no markdown, no extra text.
 Generate between 4 and 8 flashcards and between 4 and 8 quiz questions.
@@ -38,26 +37,23 @@ export async function generate(req, res) {
   } catch (err) {
     const status = err?.status ?? err?.httpStatus ?? 500;
 
-    if (status === 401 || status === 403) {
+    if (status === 401 || status === 403)
       return res
         .status(500)
         .json({ error: true, message: 'API key invalid or unauthorised.' });
-    }
-    if (status === 429) {
-      return res
-        .status(429)
-        .json({
-          error: true,
-          message: 'Rate limit reached. Please wait a moment and retry.',
-        });
-    }
-    if (err instanceof SyntaxError) {
+
+    if (status === 429)
+      return res.status(429).json({
+        error: true,
+        message: 'Rate limit reached. Please wait a moment and retry.',
+      });
+
+    if (err instanceof SyntaxError)
       return res
         .status(500)
         .json({ error: true, message: 'Model returned unparseable output.' });
-    }
 
-    console.error('[generate] unexpected error:', err.message);
+    console.error('Generation error:', err.message);
     return res
       .status(500)
       .json({ error: true, message: 'Generation failed. Please retry.' });
