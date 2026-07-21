@@ -1,6 +1,4 @@
-import EmptyState from '../states/EmptyState.jsx';
-import ErrorState from '../states/ErrorState.jsx';
-import LoadingState from '../states/LoadingState.jsx';
+import { InitialWorkspaceState, ErrorState, LoadingState } from '../states';
 import FlashcardDeck from '../flashcards/FlashcardDeck.jsx';
 import Quiz from '../quiz/Quiz.jsx';
 
@@ -16,7 +14,7 @@ function WorkspacePanel({
   onRetry,
   onStartQuiz,
   onRetestWrong,
-  onRetestCards,
+  onReviewCards,
   onBackToFlashcards,
 }) {
   if (status === 'loading') return <LoadingState />;
@@ -47,24 +45,24 @@ function WorkspacePanel({
     }
 
     const cards = flashcardSubset ?? data.flashcards;
-    const isRetest = flashcardSubset !== null;
+    const isReview = flashcardSubset !== null;
 
     return (
       <FlashcardDeck
         key={deckKey}
         flashcards={cards}
         topic={
-          isRetest
+          isReview
             ? `Retesting ${cards.length} unknown card${cards.length !== 1 ? 's' : ''}`
             : data.topic
         }
         onStartQuiz={() => onStartQuiz(data.quiz)}
-        onRetestCards={onRetestCards}
+        onReviewCards={onReviewCards}
       />
     );
   }
 
-  return <EmptyState />;
+  return <InitialWorkspaceState />;
 }
 
 export default WorkspacePanel;

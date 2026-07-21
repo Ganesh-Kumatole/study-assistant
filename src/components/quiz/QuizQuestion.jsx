@@ -3,13 +3,13 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 function QuizQuestion({ item, index, total, onAnswer }) {
   return (
     <div className="quiz-question-wrapper">
-      <p className="card-counter" aria-live="polite">
+      <p className="card-counter">
         Question {index + 1} / {total}
       </p>
 
       <p className="question-text">{item.question}</p>
 
-      <ol className="options-list" aria-label="Answer options">
+      <ol className="options-list">
         {item.options.map((option, i) => {
           const isSelected = item.selectedIndex === i;
           const isAnswered = item.selectedIndex !== undefined;
@@ -23,21 +23,21 @@ function QuizQuestion({ item, index, total, onAnswer }) {
               stateClass = 'option-correct';
               label = (
                 <span className="option-label">
-                  <CheckCircle2 size={15} aria-hidden="true" /> Correct
+                  <CheckCircle2 size={15} /> Correct
                 </span>
               );
             } else if (isSelected && !isCorrect) {
               stateClass = 'option-incorrect';
               label = (
                 <span className="option-label">
-                  <XCircle size={15} aria-hidden="true" /> Incorrect
+                  <XCircle size={15} /> Incorrect
                 </span>
               );
             } else if (!isSelected && isCorrect) {
               stateClass = 'option-revealed';
               label = (
                 <span className="option-label">
-                  <CheckCircle2 size={15} aria-hidden="true" /> Correct answer
+                  <CheckCircle2 size={15} /> Correct answer
                 </span>
               );
             }
@@ -50,7 +50,6 @@ function QuizQuestion({ item, index, total, onAnswer }) {
                 type="button"
                 disabled={isAnswered}
                 onClick={() => onAnswer(i)}
-                aria-pressed={isSelected}
               >
                 <span className="option-letter">
                   {String.fromCharCode(65 + i)}

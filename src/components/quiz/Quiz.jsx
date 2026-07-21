@@ -9,7 +9,7 @@ function Quiz({ questions, onRetestWrong, onBackToFlashcards }) {
     questions.map((q) => ({ ...q, selectedIndex: undefined })),
   );
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [done, setDone] = useState(false);
+  const [isDone, setisDone] = useState(false);
 
   const current = items[currentIndex];
   const isAnswered = current.selectedIndex !== undefined;
@@ -25,14 +25,16 @@ function Quiz({ questions, onRetestWrong, onBackToFlashcards }) {
 
   function handleNext() {
     if (isLastQuestion) {
-      setDone(true);
+      setisDone(true);
     } else {
       setCurrentIndex((i) => i + 1);
     }
   }
 
-  if (done) {
-    const score = items.filter((item) => item.selectedIndex === item.correctIndex).length;
+  if (isDone) {
+    const score = items.filter(
+      (item) => item.selectedIndex === item.correctIndex,
+    ).length;
     const wrongIds = items
       .filter((item) => item.selectedIndex !== item.correctIndex)
       .map((item) => item.id);
@@ -49,7 +51,7 @@ function Quiz({ questions, onRetestWrong, onBackToFlashcards }) {
   }
 
   return (
-    <section className="state-panel quiz-panel" aria-labelledby="quiz-title">
+    <section className="state-panel quiz-panel">
       <div className="state-kicker" id="quiz-title">
         Quiz
       </div>
@@ -67,7 +69,7 @@ function Quiz({ questions, onRetestWrong, onBackToFlashcards }) {
           type="button"
           onClick={handleNext}
         >
-          <ArrowRight size={17} aria-hidden="true" />
+          <ArrowRight size={17} />
           {isLastQuestion ? 'See results' : 'Next question'}
         </button>
       )}

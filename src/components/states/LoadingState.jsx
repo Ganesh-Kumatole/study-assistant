@@ -2,11 +2,7 @@ import { Loader2 } from 'lucide-react';
 
 function LoadingState() {
   return (
-    <section
-      className="state-panel loading-state"
-      aria-live="polite"
-      aria-busy="true"
-    >
+    <section className="state-panel loading-state">
       <span className="state-icon loading" aria-hidden="true">
         <Loader2 size={24} />
       </span>

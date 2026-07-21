@@ -2,11 +2,7 @@ import { AlertTriangle, RotateCcw } from 'lucide-react';
 
 function ErrorState({ title, message, meta, onRetry }) {
   return (
-    <section
-      className="state-panel error-state"
-      role="alert"
-      aria-labelledby="error-title"
-    >
+    <section className="state-panel error-state">
       <span className="state-icon warning" aria-hidden="true">
         <AlertTriangle size={24} />
       </span>
@@ -15,15 +11,14 @@ function ErrorState({ title, message, meta, onRetry }) {
         <div className="state-kicker">Needs attention</div>
         <h2 id="error-title">{title}</h2>
         <p>{message}</p>
-        {meta ? <p className="state-meta">{meta}</p> : null}
       </div>
 
       <button
         className="primary-action compact"
         type="button"
-        onClick={onRetry}
+        onClick={() => onRetry()}
       >
-        <RotateCcw size={18} aria-hidden="true" />
+        <RotateCcw size={18} />
         Retry from saved notes
       </button>
     </section>

@@ -1,9 +1,18 @@
 import { BookOpen, CheckCircle2 } from 'lucide-react';
 
 const featureHighlights = [
-  'Flashcards, quizzes, and retests stay in one flow',
-  'Explanations make every quiz answer teachable',
-  'Drafts are preserved when something needs a retry',
+  {
+    id: 1,
+    value: 'Flashcards, quizzes, and retests stay in one flow',
+  },
+  {
+    id: 2,
+    value: 'Explanations make every quiz answer teachable',
+  },
+  {
+    id: 3,
+    value: 'Drafts are preserved when something needs a retry',
+  },
 ];
 
 function HeroBand() {
@@ -26,10 +35,10 @@ function HeroBand() {
       </div>
 
       <ul className="quality-list" aria-label="Build priorities">
-        {featureHighlights.map((item) => (
-          <li key={item}>
+        {featureHighlights.map((feature) => (
+          <li key={feature.id}>
             <CheckCircle2 size={17} aria-hidden="true" />
-            <span>{item}</span>
+            <span>{feature.value}</span>
           </li>
         ))}
       </ul>

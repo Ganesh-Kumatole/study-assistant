@@ -1,8 +1,13 @@
 import { BookOpen, RotateCcw } from 'lucide-react';
 
-function DeckSummary({ total, unknownCount, onStartQuiz, onRetestCards }) {
+function FlashcardDeckSummary({
+  total,
+  unknownCount,
+  onStartQuiz,
+  onReviewCards,
+}) {
   return (
-    <section className="state-panel deck-summary" aria-labelledby="summary-title">
+    <section className="state-panel deck-summary">
       <div className="state-kicker">Deck complete</div>
       <h2 id="summary-title">
         {unknownCount === 0
@@ -12,19 +17,23 @@ function DeckSummary({ total, unknownCount, onStartQuiz, onRetestCards }) {
       <p>
         {unknownCount === 0
           ? 'Great work. Ready to test yourself?'
-          : 'You can take the full quiz or focus on the cards you found tricky.'}
+          : 'You can take the full quiz or review the cards you found tricky.'}
       </p>
 
       <div className="form-actions">
         <button className="primary-action" type="button" onClick={onStartQuiz}>
-          <BookOpen size={17} aria-hidden="true" />
+          <BookOpen size={17} />
           Take full quiz
         </button>
 
-        {onRetestCards && (
-          <button className="ghost-action" type="button" onClick={onRetestCards}>
-            <RotateCcw size={17} aria-hidden="true" />
-            Retest {unknownCount} unknown card{unknownCount !== 1 ? 's' : ''}
+        {onReviewCards && (
+          <button
+            className="ghost-action"
+            type="button"
+            onClick={onReviewCards}
+          >
+            <RotateCcw size={17} />
+            Review {unknownCount} unknown card{unknownCount !== 1 ? 's' : ''}
           </button>
         )}
       </div>
@@ -32,4 +41,4 @@ function DeckSummary({ total, unknownCount, onStartQuiz, onRetestCards }) {
   );
 }
 
-export default DeckSummary;
+export default FlashcardDeckSummary;

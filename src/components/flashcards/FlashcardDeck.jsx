@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import Flashcard from './Flashcard.jsx';
-import DeckSummary from './DeckSummary.jsx';
+import FlashcardDeckSummary from './FlashcardDeckSummary.jsx';
 
-function FlashcardDeck({ flashcards, topic, onStartQuiz, onRetestCards }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+function FlashcardDeck({ flashcards, topic, onStartQuiz, onReviewCards }) {
+  const [currentIndex, setCurrentIndex] = useState(0); // index of current card
   const [marks, setMarks] = useState({}); // { [cardId]: true (known) | false (unknown) }
-  const [deckKey, setDeckKey] = useState(0); // remounts Flashcard to reset flip state on navigation
+  const [localKey, setlocalKey] = useState(0); // remounts flashcard to reset flip state
 
   const isLastCard = currentIndex === flashcards.length - 1;
   const allMarked = Object.keys(marks).length === flashcards.length;
@@ -23,7 +23,7 @@ function FlashcardDeck({ flashcards, topic, onStartQuiz, onRetestCards }) {
   function handleNext() {
     if (!isLastCard) {
       setCurrentIndex((i) => i + 1);
-      setDeckKey((k) => k + 1);
+      setlocalKey((k) => k + 1);
     }
   }
 
@@ -32,23 +32,25 @@ function FlashcardDeck({ flashcards, topic, onStartQuiz, onRetestCards }) {
 
   if (isDone) {
     return (
-      <DeckSummary
+      <FlashcardDeckSummary
         total={flashcards.length}
         unknownCount={unknownIds.length}
         onStartQuiz={onStartQuiz}
-        onRetestCards={unknownIds.length > 0 ? () => onRetestCards(unknownIds) : null}
+        onReviewCards={
+          unknownIds.length > 0 ? () => onReviewCards(unknownIds) : null
+        }
       />
     );
   }
 
   return (
-    <section className="state-panel flashcard-deck" aria-labelledby="deck-title">
+    <section className="state-panel flashcard-deck">
       <div className="state-kicker" id="deck-title">
         {topic}
       </div>
 
       <Flashcard
-        key={deckKey}
+        key={localKey}
         card={currentCard}
         index={currentIndex}
         total={flashcards.length}
@@ -62,7 +64,7 @@ function FlashcardDeck({ flashcards, topic, onStartQuiz, onRetestCards }) {
           onClick={handleNext}
           disabled={isLastCard}
         >
-          <ArrowRight size={17} aria-hidden="true" />
+          <ArrowRight size={17} />
           {isLastCard ? 'Last card' : 'Next card'}
         </button>
       )}

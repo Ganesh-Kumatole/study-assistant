@@ -8,20 +8,17 @@ function Flashcard({ card, index, total, onMark }) {
     setFlipped((f) => !f);
   }
 
-  function handleMark(known) {
-    onMark(card.id, known);
+  function handleMark(isKnown) {
+    onMark(card.id, isKnown);
   }
 
   return (
     <div className="flashcard-wrapper">
-      <p className="card-counter" aria-live="polite">
+      <p className="card-counter">
         Card {index + 1} / {total}
       </p>
 
-      <div
-        className={`flashcard${flipped ? ' is-flipped' : ''}`}
-        aria-label={flipped ? `Back: ${card.back}` : `Front: ${card.front}`}
-      >
+      <div className={`flashcard${flipped ? ' is-flipped' : ''}`}>
         <div className="flashcard-face flashcard-front">
           <span className="face-label">Front</span>
           <p>{card.front}</p>
@@ -34,7 +31,7 @@ function Flashcard({ card, index, total, onMark }) {
 
       <div className="card-actions">
         <button className="ghost-action" type="button" onClick={handleFlip}>
-          <RotateCcw size={17} aria-hidden="true" />
+          <RotateCcw size={17} />
           {flipped ? 'Show front' : 'Flip'}
         </button>
 
@@ -45,7 +42,7 @@ function Flashcard({ card, index, total, onMark }) {
               type="button"
               onClick={() => handleMark(true)}
             >
-              <CheckCircle2 size={17} aria-hidden="true" />
+              <CheckCircle2 size={17} />
               Known
             </button>
             <button
@@ -53,7 +50,7 @@ function Flashcard({ card, index, total, onMark }) {
               type="button"
               onClick={() => handleMark(false)}
             >
-              <XCircle size={17} aria-hidden="true" />
+              <XCircle size={17} />
               Unknown
             </button>
           </>

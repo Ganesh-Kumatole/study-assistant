@@ -17,7 +17,7 @@ function InputForm({
     : `${remainingCharacters} more characters needed before generation.`;
 
   return (
-    <form className="input-panel" onSubmit={onSubmit}>
+    <form className="input-panel" onSubmit={() => onSubmit()}>
       <div className="panel-heading">
         <span className="panel-icon" aria-hidden="true">
           <FileText size={20} />
@@ -37,7 +37,6 @@ function InputForm({
         readOnly={isLocked}
         rows={12}
         onChange={(event) => onNotesChange(event.target.value)}
-        aria-describedby="study-notes-help study-notes-count"
         placeholder="Example: Photosynthesis overview, key terms from my biology notes, and the difference between light-dependent and Calvin cycle reactions..."
       />
 
@@ -52,7 +51,7 @@ function InputForm({
           type="submit"
           disabled={!canSubmit || isLocked}
         >
-          <ArrowRight size={18} aria-hidden="true" />
+          <ArrowRight size={18} />
           Generate study set
         </button>
 
@@ -60,10 +59,9 @@ function InputForm({
           className="ghost-action"
           type="button"
           disabled={!hasNotes || isLocked}
-          onClick={onClear}
-          aria-label="Clear study prompt"
+          onClick={() => onClear()}
         >
-          <Trash2 size={18} aria-hidden="true" />
+          <Trash2 size={18} />
           Clear
         </button>
       </div>

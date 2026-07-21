@@ -1,13 +1,25 @@
 import { BookOpen, RotateCcw } from 'lucide-react';
 
-function QuizResults({ score, total, wrongIds, onRetestWrong, onBackToFlashcards }) {
+function QuizResults({
+  score,
+  total,
+  wrongIds,
+  onRetestWrong,
+  onBackToFlashcards,
+}) {
   const isPerfect = score === total;
 
   return (
-    <section className="state-panel quiz-results" aria-labelledby="results-title">
+    <section
+      className="state-panel quiz-results"
+      aria-labelledby="results-title"
+    >
       <div className="state-kicker">Results</div>
 
-      <div className="score-display" aria-label={`Score: ${score} out of ${total}`}>
+      <div
+        className="score-display"
+        aria-label={`Score: ${score} out of ${total}`}
+      >
         <span className="score-fraction">
           {score}
           <span className="score-sep">/{total}</span>
@@ -31,7 +43,8 @@ function QuizResults({ score, total, wrongIds, onRetestWrong, onBackToFlashcards
             onClick={() => onRetestWrong(wrongIds)}
           >
             <RotateCcw size={17} aria-hidden="true" />
-            Retest {wrongIds.length} wrong answer{wrongIds.length !== 1 ? 's' : ''}
+            Retest {wrongIds.length} wrong answer
+            {wrongIds.length !== 1 ? 's' : ''}
           </button>
         )}
 
