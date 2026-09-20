@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { generate as generateResponse } from '../controllers/generate.controller.js';
+import { generateResponseHandler } from '../controllers/generate.controller.js';
 
 const router = Router();
 
 // frontend hits this to get flashcards + quiz from Gemini
-router.post('/generate', generateResponse);
+router.post('/generate', generateResponseHandler);
 
 export default router;

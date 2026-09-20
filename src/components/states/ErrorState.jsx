@@ -1,6 +1,6 @@
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 
-function ErrorState({ title, message, meta, onRetry }) {
+function ErrorState({ title, message, onRetry }) {
   return (
     <section className="state-panel error-state">
       <span className="state-icon warning" aria-hidden="true">

@@ -1,4 +1,4 @@
-import { InitialWorkspaceState, ErrorState, LoadingState } from '../states';
+import { InitialState, ErrorState, LoadingState } from '../states';
 import FlashcardDeck from '../flashcards/FlashcardDeck.jsx';
 import Quiz from '../quiz/Quiz.jsx';
 
@@ -62,7 +62,7 @@ function WorkspacePanel({
     );
   }
 
-  return <InitialWorkspaceState />;
+  return <InitialState />;
 }
 
 export default WorkspacePanel;
