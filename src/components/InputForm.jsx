@@ -17,7 +17,7 @@ function InputForm({
     : `${remainingCharacters} more characters needed before generation.`;
 
   return (
-    <form className="input-panel" onSubmit={() => onSubmit()}>
+    <form className="input-panel" onSubmit={onSubmit}>
       <div className="panel-heading">
         <span className="panel-icon" aria-hidden="true">
           <FileText size={20} />
