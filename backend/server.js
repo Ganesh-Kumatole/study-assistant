@@ -9,11 +9,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // load the .env.local file
 dotenv.config({ path: resolve(__dirname, '../.env.local') });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
 app.use('/api', generateRoute);
+
+app.use(express.static(resolve(__dirname, '../dist')));
+app.get(/.*/, (_req, res) => {
+  res.sendFile(resolve(__dirname, '../dist/index.html'));
+});
 
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}`),
